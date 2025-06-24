@@ -1,24 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+// src/pages/MovieDetail.tsx
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { formatDate } from "../utils/formatDate";
 import type { Movie } from "../types/Movie";
 
 const API_KEY = "063f1d50791f7f275acde73b162729f2";
-const BASE_URL = "https://api.themoviedb.org/3";
 
 export default function MovieDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchMovie() {
       setLoading(true);
-      setError("");
+      setError(null);
       try {
-        const res = await axios.get<Movie>(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=pt-BR`);
+        const res = await axios.get(
+          `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=pt-BR`
+        );
         setMovie(res.data);
       } catch {
         setError("Erro ao carregar detalhes do filme.");
@@ -29,71 +33,81 @@ export default function MovieDetail() {
     if (id) fetchMovie();
   }, [id]);
 
-  if (loading) return <div className="p-4 text-center">Carregando...</div>;
-  if (error) return <div className="p-4 text-center text-red-600">{error}</div>;
-  if (!movie) return null;
+  if (loading) return <div className="text-center p-8">Carregando...</div>;
+  if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
+  if (!movie) return <div className="text-center p-8">Filme não encontrado.</div>;
+
+  const backdropUrl = movie.backdrop_path
+    ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+    : "";
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <Link to="/" className="text-blue-600 hover:underline mb-4 inline-block">
-        &larr; Voltar
-      </Link>
-      <div className="flex flex-col md:flex-row gap-6">
-        {movie.poster_path ? (
-          <img
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-            alt={movie.title}
-            className="rounded-lg shadow-lg flex-shrink-0 max-w-xs mx-auto md:mx-0"
-          />
-        ) : (
-          <div className="w-64 h-96 bg-gray-300 flex items-center justify-center rounded-lg">
-            Sem imagem
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      {/* Banner */}
+      <div
+        className="relative h-[45vh] sm:h-[60vh] bg-cover bg-center flex-shrink-0 transition-all duration-700"
+        style={{ backgroundImage: `url(${backdropUrl})` }}
+        role="img"
+        aria-label={`Imagem de fundo do filme ${movie.title}`}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
+
+        {/* Botão voltar */}
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/");
+            }
+          }}
+          className="absolute top-4 left-4 bg-gray-800 bg-opacity-70 hover:bg-blue-600 text-white px-4 py-2 rounded transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          aria-label="Voltar"
+          type="button"
+        >
+          &larr; Voltar
+        </button>
+
+        {/* Info no banner */}
+        <div className="absolute bottom-8 left-6 sm:left-12 text-white drop-shadow-xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4">{movie.title}</h1>
+
+          <div className="flex flex-wrap gap-4 text-sm sm:text-base items-center">
+            <span>{formatDate(movie.release_date)}</span>
+            <span className="bg-blue-600 px-3 py-1 rounded font-semibold">Nota: {movie.vote_average.toFixed(1)}</span>
+            {movie.runtime != null && (
+              <span className="bg-gray-800 bg-opacity-70 px-3 py-1 rounded">
+                Duração: {movie.runtime} min
+              </span>
+            )}
           </div>
-        )}
-
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-bold mb-2">{movie.title}</h1>
-          {movie.tagline && <p className="italic text-gray-400 mb-4">{movie.tagline}</p>}
-          <p className="mb-4">{movie.overview}</p>
-
-          <p>
-            <strong>Data de lançamento:</strong> {formatDate(movie.release_date)}
-          </p>
-          <p>
-            <strong>Duração:</strong> {movie.runtime ? `${movie.runtime} min` : "Não disponível"}
-          </p>
-          <p>
-            <strong>Idioma original:</strong> {movie.original_language?.toUpperCase() ?? "Não disponível"}
-          </p>
-
-          {movie.genres && movie.genres.length > 0 && (
-            <>
-              <h3 className="font-semibold text-lg mt-6 mb-2">Gêneros</h3>
-              <div className="flex flex-wrap gap-2">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="bg-gray-700 px-3 py-1 rounded-full text-sm text-white"
-                  >
-                    {genre.name}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
-
-          <p className="mt-4">
-            <strong>Avaliação:</strong>{" "}
-            <span
-              className={`inline-block px-2 py-1 rounded ${
-                movie.vote_average > 6 ? "bg-green-600" : "bg-red-600"
-              } text-white font-semibold`}
-            >
-              {movie.vote_average.toFixed(1)}
-            </span>
-          </p>
         </div>
       </div>
+
+      {/* Conteúdo principal */}
+      <main className="max-w-5xl w-full mx-auto p-6 flex-grow">
+        {/* Sinopse */}
+        <section className="mb-6">
+          <h2 className="text-2xl font-semibold mb-2 border-b border-gray-700 pb-1">Sinopse</h2>
+          <p className="text-gray-300 leading-relaxed">{movie.overview || "Sem descrição disponível."}</p>
+        </section>
+
+        {/* Gêneros */}
+        <section className="flex flex-wrap gap-3 mb-10">
+          {movie.genres && movie.genres.length > 0 ? (
+            movie.genres.map((genre) => (
+              <span
+                key={genre.id}
+                className="bg-indigo-600 px-3 py-1 rounded-full text-sm font-medium text-white"
+              >
+                {genre.name}
+              </span>
+            ))
+          ) : (
+            <span className="text-gray-500">Gêneros não disponíveis</span>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
