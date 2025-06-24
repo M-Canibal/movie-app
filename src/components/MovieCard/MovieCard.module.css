@@ -1,0 +1,44 @@
+.card {
+  border-width: 4px;
+  border-style: solid;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.image {
+  width: 100%;
+  display: block;
+}
+
+.content {
+  padding: 0.5rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.date {
+  font-style: italic;
+  color: #666;
+}
+
+.rating {
+  font-weight: 500;
+  color: #333;
+}
+
+.greenBorder {
+  border-color: #22c55e; /* verde */
+}
+
+.redBorder {
+  border-color: #ef4444; /* vermelho */
+}

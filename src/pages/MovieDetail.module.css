@@ -1,0 +1,35 @@
+.container {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.image {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.date {
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.vote {
+  margin-bottom: 0.5rem;
+}
+
+.overview {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.info {
+  margin-bottom: 0.25rem;
+}
