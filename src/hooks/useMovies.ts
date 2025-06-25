@@ -1,20 +1,12 @@
+// src/hooks/useMovies.ts
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-const API_KEY = "063f1d50791f7f275acde73b162729f2";
-const BASE_URL = "https://api.themoviedb.org/3";
-
-export interface Movie {
-  id: number;
-  poster_path: string;
-  title: string;
-  release_date: string;
-  vote_average: number;
-}
+import type { Movie } from "../types/Movie";
+import { API_KEY, BASE_URL } from "../config";
 
 export function useMovies(query: string) {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,27 +15,21 @@ export function useMovies(query: string) {
       setError(null);
       try {
         const url = query
-          ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
-          : `${BASE_URL}/trending/movie/week?api_key=${API_KEY}`;
+          ? `${BASE_URL}/search/movie?api_key=${API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`
+          : `${BASE_URL}/trending/movie/week?api_key=${API_KEY}&language=pt-BR`;
 
-        console.log("🔍 URL da requisição:", url);
-
-        const response = await axios.get(url);
-        console.log("🎬 Dados recebidos:", response.data);
-
-        const sorted = response.data.results.sort(
+        const res = await axios.get(url);
+        const sortedMovies = res.data.results.sort(
           (a: Movie, b: Movie) => b.vote_average - a.vote_average
         );
-
-        setMovies(sorted);
-      } catch (err: any) {
-        console.error("❌ Erro ao buscar filmes:", err.message);
-        setError("Erro ao carregar filmes");
+        setMovies(sortedMovies);
+      } catch {
+        setError("Erro ao carregar filmes.");
+        setMovies([]);
       } finally {
         setLoading(false);
       }
     }
-
     fetchMovies();
   }, [query]);
 

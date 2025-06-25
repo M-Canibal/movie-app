@@ -4,8 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { formatDate } from "../utils/formatDate";
 import type { Movie } from "../types/Movie";
-
-const API_KEY = "063f1d50791f7f275acde73b162729f2";
+import { API_KEY, BASE_URL, IMAGE_BASE } from "../config";
 
 export default function MovieDetail() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +20,7 @@ export default function MovieDetail() {
       setError(null);
       try {
         const res = await axios.get(
-          `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=pt-BR`
+          `${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=pt-BR`
         );
         setMovie(res.data);
       } catch {
@@ -38,7 +37,7 @@ export default function MovieDetail() {
   if (!movie) return <div className="text-center p-8">Filme não encontrado.</div>;
 
   const backdropUrl = movie.backdrop_path
-    ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+    ? `${IMAGE_BASE}/original${movie.backdrop_path}`
     : "";
 
   return (
