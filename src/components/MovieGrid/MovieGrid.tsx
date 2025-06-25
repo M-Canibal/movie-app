@@ -1,14 +1,25 @@
-import React from "react";
-import type { Movie } from "../../types/Movie";
 import MovieCard from "../MovieCard/MovieCard";
+import styles from "./MovieGrid.module.css";
+
+interface Movie {
+  id: number;
+  poster_path: string;
+  title: string;
+  release_date: string;
+  vote_average: number;
+}
 
 interface Props {
   movies: Movie[];
 }
 
 export default function MovieGrid({ movies }: Props) {
+  if (movies.length === 0) {
+    return <div className={styles.empty}>Nenhum filme encontrado.</div>;
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+    <div className={styles.grid}>
       {movies.map((movie) => (
         <MovieCard key={movie.id} movie={movie} />
       ))}
