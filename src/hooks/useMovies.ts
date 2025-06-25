@@ -1,50 +1,43 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import type { Movie } from "../types/Movie";
 
-const API_KEY = "063f1d50791f7f275acde73b162729f2";
+const API_KEY = "SUA_API_KEY_TMDB";
 const BASE_URL = "https://api.themoviedb.org/3";
 
-export interface Movie {
-  id: number;
-  poster_path: string;
-  title: string;
-  release_date: string;
-  vote_average: number;
+async function fetchData<T>(url: string): Promise<T> {
+  const response = await axios.get(url);
+  return response.data;
 }
 
 export function useMovies(query: string) {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchMovies() {
+    async function loadMovies() {
       setLoading(true);
       setError(null);
       try {
-        const url = query
-          ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
-          : `${BASE_URL}/trending/movie/week?api_key=${API_KEY}`;
+        const endpoint = query
+          ? `/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=pt-BR`
+          : `/trending/movie/week?api_key=${API_KEY}&language=pt-BR`;
 
-        console.log("🔍 URL da requisição:", url);
+        const data = await fetchData<{ results: Movie[] }>(`${BASE_URL}${endpoint}`);
 
-        const response = await axios.get(url);
-        console.log("🎬 Dados recebidos:", response.data);
-
-        const sorted = response.data.results.sort(
-          (a: Movie, b: Movie) => b.vote_average - a.vote_average
-        );
+        // Ordena por nota decrescente
+        const sorted = data.results.sort((a, b) => b.vote_average - a.vote_average);
 
         setMovies(sorted);
-      } catch (err: any) {
-        console.error("❌ Erro ao buscar filmes:", err.message);
-        setError("Erro ao carregar filmes");
+      } catch {
+        setError("Erro ao buscar filmes");
+        setMovies([]);
       } finally {
         setLoading(false);
       }
     }
-
-    fetchMovies();
+    loadMovies();
   }, [query]);
 
   return { movies, loading, error };

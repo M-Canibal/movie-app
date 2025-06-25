@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { formatDate } from "../utils/dateFormat";
+import { formatDate } from "../utils/formatDate";
 import type { Movie } from "../types/Movie";
+import { min } from "date-fns";
 
 const API_KEY = "SUA_API_KEY_TMDB";
 
